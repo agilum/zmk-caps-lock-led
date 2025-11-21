@@ -1,3 +1,0 @@
-config ZMK_CAPS_LOCK_LED
-    bool "Enable caps lock LED indicator module"
-    default y
