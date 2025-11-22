@@ -4,7 +4,8 @@
 #include <zephyr/devicetree.h>
 #include <zephyr/logging/log.h>
 #include <zmk/event_manager.h>
-#include <zmk/events/hid_indicators.h>
+#include <zmk/events/hid_indicators_changed.h>  // Updated include for the event
+#include <zmk/hid_indicators_types.h>  // Added for indicator bit definitions like ZMK_HID_INDICATOR_CAPS_LOCK
 
 LOG_MODULE_REGISTER(caps_lock_led, CONFIG_ZMK_LOG_LEVEL);
 
