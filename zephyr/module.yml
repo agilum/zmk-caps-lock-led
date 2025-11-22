@@ -2,5 +2,5 @@ name: caps_lock_led
 build:
   cmake: .
   depends:
-    - zmk
+    
 # No 'build' or 'cmake' section needed—Zephyr defaults to the root dir for CMakeLists.txt
