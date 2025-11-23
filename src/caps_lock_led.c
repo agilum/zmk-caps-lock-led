@@ -5,9 +5,9 @@
 #include <zephyr/logging/log.h>
 #include <zmk/event_manager.h>
 #include <zmk/events/hid_indicators_changed.h>
-#include <zmk/hid.h>  // For BIT(1) if needed, but use ZMK_HID_INDICATOR_CAPS_LOCK if available
+#include <zmk/hid.h>
 
-LOG_MODULE_REGISTER(caps_lock_led, LOG_LEVEL_DBG);  // DBG for verbose output
+LOG_MODULE_REGISTER(caps_lock_led, LOG_LEVEL_DBG);
 
 static const struct device *led_dev = DEVICE_DT_GET(DT_NODELABEL(caps_leds));
 
@@ -20,17 +20,17 @@ static int init_caps_lock_led(void) {
     return 0;
 }
 
-struct zmk_event_header;  // Forward declaration
+static int caps_lock_callback(const struct zmk_event_t *eh) {
+    const struct zmk_hid_indicators_changed *ev = as_zmk_hid_indicators_changed(eh);
+    if (ev == NULL) return ZMK_EV_EVENT_BUBBLE;
 
-static int caps_lock_callback(const struct zmk_event_header *eh) {
-    struct zmk_hid_indicators_changed *ev = (struct zmk_hid_indicators_changed *)eh;
     LOG_DBG("HID indicators changed event received: indicators = 0x%02X", ev->indicators);
 
     if (device_is_ready(led_dev)) {
-        if (ev->indicators & BIT(1)) {  // Caps Lock bit (0x02)
+        if (ev->indicators & BIT(1)) {  // Caps Lock ON
             LOG_DBG("Turning caps lock LED ON");
             led_on(led_dev, 0);
-        } else {
+        } else {  // OFF
             LOG_DBG("Turning caps lock LED OFF");
             led_off(led_dev, 0);
         }
@@ -38,10 +38,10 @@ static int caps_lock_callback(const struct zmk_event_header *eh) {
         LOG_ERR("Caps lock LED device not ready");
     }
 
-    return 0;
+    return ZMK_EV_EVENT_BUBBLE;
 }
 
 ZMK_LISTENER(caps_lock_led_listener, caps_lock_callback);
 ZMK_SUBSCRIPTION(caps_lock_led_listener, zmk_hid_indicators_changed);
 
-SYS_INIT(init_caps_lock_led, APPLICATION, CONFIG_APPLICATION_INIT_PRIORITY);  // Boot init
+SYS_INIT(init_caps_lock_led, APPLICATION, CONFIG_APPLICATION_INIT_PRIORITY);
