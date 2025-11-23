@@ -3,9 +3,9 @@
 #include <zephyr/drivers/led.h>
 #include <zephyr/devicetree.h>
 #include <zephyr/logging/log.h>
-#include <zmk/event_manager.h>
-#include <zmk/events/hid_indicators_changed.h>  // Updated include for the event
-#include <zmk/hid_indicators_types.h>  // Added for indicator bit definitions like ZMK_HID_INDICATOR_CAPS_LOCK
+#include <zmk/event_manager.h>  // For struct zmk_event_header, ZMK_LISTENER, ZMK_SUBSCRIPTION
+#include <zmk/events/hid_indicators_changed.h>  // For the event struct
+#include <zmk/hid.h>  // For ZMK_HID_INDICATOR_CAPS_LOCK
 
 LOG_MODULE_REGISTER(caps_lock_led, CONFIG_ZMK_LOG_LEVEL);
 
@@ -16,9 +16,9 @@ static int caps_lock_callback(const struct zmk_event_header *eh) {
 
     if (device_is_ready(led_dev)) {
         if (ev->indicators & ZMK_HID_INDICATOR_CAPS_LOCK) {
-            led_on(led_dev, 0);  // Turn on the LED (index 0, since it's the only one in the node)
+            led_on(led_dev, 0);
         } else {
-            led_off(led_dev, 0);  // Turn off the LED
+            led_off(led_dev, 0);
         }
     } else {
         LOG_ERR("Caps lock LED device not ready");
