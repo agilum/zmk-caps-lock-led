@@ -20,7 +20,7 @@ static int init_caps_lock_led(void) {
     return 0;
 }
 
-static int caps_lock_callback(const struct zmk_event_t *eh) {
+static int caps_lock_callback(const struct zmk_event_t *eh) {  //removed struct after const
     const struct zmk_hid_indicators_changed *ev = as_zmk_hid_indicators_changed(eh);
     if (ev == NULL) return ZMK_EV_EVENT_BUBBLE;
 
