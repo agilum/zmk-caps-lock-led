@@ -11,7 +11,7 @@ LOG_MODULE_REGISTER(caps_lock_led, LOG_LEVEL_DBG);
 
 // --- CONFIGURATION ---
 // Define the desired brightness (0-100) when Caps Lock is ON
-#define CAPS_LED_BRIGHTNESS 50
+#define CAPS_LED_BRIGHTNESS 10
 
 // Get the PARENT device (the controller) using the node label defined in DTS
 static const struct device *led_dev = DEVICE_DT_GET(DT_NODELABEL(caps_leds));
