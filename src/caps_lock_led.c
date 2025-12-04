@@ -36,7 +36,7 @@ static int caps_lock_callback(const struct zmk_event_t *eh) {
         // Caps Lock is the second bit (BIT(1)) in the HID indicators mask
         bool caps_lock_active = (ev->indicators & BIT(1));
         
-        int brightness_percent;
+        uint8_ brightness_percent;
 
 #if IS_ENABLED(CONFIG_ZMK_BACKLIGHT)
         // 1. Get the current persistent backlight level (0-100% or levels)
@@ -44,7 +44,7 @@ static int caps_lock_callback(const struct zmk_event_t *eh) {
         
         // 2. Convert level to percentage (0-100)
         // FIX: Corrected typo from zmk_backlight_calc_brighness_val to zmk_backlight_calc_brightness_val
-        uint8_t brightness_percent = zmk_backlight_get_brightness();
+        brightness_percent = zmk_backlight_get_brightness();
         LOG_INF("Stored backlight brightness: %d%%", brightness_percent);
         // 3. Logic: If backlight is ON, make Caps Lock slightly brighter (+20%)
         // If backlight is OFF (0%), keep Caps Lock somewhat visible (e.g. 20%) or off?
