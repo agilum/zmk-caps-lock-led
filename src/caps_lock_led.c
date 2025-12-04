@@ -6,16 +6,12 @@
 #include <zmk/event_manager.h>
 #include <zmk/events/hid_indicators_changed.h>
 #include <zmk/hid.h>
-
-// Safely include backlight header only if the feature is enabled
-#if IS_ENABLED(CONFIG_ZMK_BACKLIGHT)
-    #include <zmk/backlight.h>
-#endif
+#include <zmk/backlight.h>
 
 LOG_MODULE_REGISTER(caps_lock_led, LOG_LEVEL_DBG);
 
 // Default brightness if backlight is disabled or unavailable
-#define DEFAULT_CAPS_BRIGHTNESS 50
+#define DEFAULT_CAPS_BRIGHTNESS 20
 
 // Get the PARENT device (the controller) using the node label defined in DTS
 // Assumes a structure like: caps_leds: caps_pwm_leds { caps_lock_led: ... }
@@ -44,16 +40,16 @@ static int caps_lock_callback(const struct zmk_event_t *eh) {
 
 #if IS_ENABLED(CONFIG_ZMK_BACKLIGHT)
         // 1. Get the current persistent backlight level (0-100% or levels)
-        int current_level = zmk_backlight_get_level();
+        //int current_level = zmk_backlight_get_level();
         
         // 2. Convert level to percentage (0-100)
         // FIX: Corrected typo from zmk_backlight_calc_brighness_val to zmk_backlight_calc_brightness_val
-        brightness_percent = zmk_backlight_calc_brightness_val(current_level);
-
+        uint8_t brightness_percent = zmk_backlight_get_brightness();
+        LOG_INF("Stored backlight brightness: %d%%", brightness_percent);
         // 3. Logic: If backlight is ON, make Caps Lock slightly brighter (+20%)
         // If backlight is OFF (0%), keep Caps Lock somewhat visible (e.g. 20%) or off?
         if (brightness_percent == 0) {
-             brightness_percent = 30; // Standalone brightness if backlight is off
+             brightness_percent = 10; // Standalone brightness if backlight is off
         } else {
              brightness_percent += 20; // Boost above ambient backlight
         }
