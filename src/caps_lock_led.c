@@ -44,15 +44,14 @@ static int caps_lock_callback(const struct zmk_event_t *eh) {
 
 #if IS_ENABLED(CONFIG_ZMK_BACKLIGHT)
         // 1. Get the current persistent backlight level (0-100% or levels)
-        // If backlight is off, this might return 0, so we handle that.
         int current_level = zmk_backlight_get_level();
         
         // 2. Convert level to percentage (0-100)
-        brightness_percent = zmk_backlight_calc_brighness_val(current_level);
+        // FIX: Corrected typo from zmk_backlight_calc_brighness_val to zmk_backlight_calc_brightness_val
+        brightness_percent = zmk_backlight_calc_brightness_val(current_level);
 
         // 3. Logic: If backlight is ON, make Caps Lock slightly brighter (+20%)
         // If backlight is OFF (0%), keep Caps Lock somewhat visible (e.g. 20%) or off?
-        // Let's assume if backlight is 0, we still want Caps Lock visible if active.
         if (brightness_percent == 0) {
              brightness_percent = 30; // Standalone brightness if backlight is off
         } else {
