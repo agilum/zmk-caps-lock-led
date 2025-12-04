@@ -6,11 +6,19 @@
 #include <zmk/event_manager.h>
 #include <zmk/events/hid_indicators_changed.h>
 #include <zmk/hid.h>
-#include <zmk/backlight.h> 
+
+// Safely include backlight header only if the feature is enabled
+#if IS_ENABLED(CONFIG_ZMK_BACKLIGHT)
+    #include <zmk/backlight.h>
+#endif
 
 LOG_MODULE_REGISTER(caps_lock_led, LOG_LEVEL_DBG);
 
+// Default brightness if backlight is disabled or unavailable
+#define DEFAULT_CAPS_BRIGHTNESS 50
+
 // Get the PARENT device (the controller) using the node label defined in DTS
+// Assumes a structure like: caps_leds: caps_pwm_leds { caps_lock_led: ... }
 static const struct device *led_dev = DEVICE_DT_GET(DT_NODELABEL(caps_leds));
 
 static int init_caps_lock_led(void) {
@@ -32,32 +40,44 @@ static int caps_lock_callback(const struct zmk_event_t *eh) {
         // Caps Lock is the second bit (BIT(1)) in the HID indicators mask
         bool caps_lock_active = (ev->indicators & BIT(1));
         
-        // 1. Get the current persistent backlight level (0-8)
+        int brightness_percent;
+
+#if IS_ENABLED(CONFIG_ZMK_BACKLIGHT)
+        // 1. Get the current persistent backlight level (0-100% or levels)
+        // If backlight is off, this might return 0, so we handle that.
         int current_level = zmk_backlight_get_level();
         
-        // 2. Convert the level index into a 0-100 duty cycle percentage
-        int brightness_percent = zmk_backlight_calc_brighness_val(current_level);
+        // 2. Convert level to percentage (0-100)
+        brightness_percent = zmk_backlight_calc_brighness_val(current_level);
 
-        // 3. Add offset (e.g., +20%) to make it brighter than the backlight
-        if (brightness_percent > 0) { // Only boost if backlight is arguably on/active logic
-             brightness_percent += 20; 
+        // 3. Logic: If backlight is ON, make Caps Lock slightly brighter (+20%)
+        // If backlight is OFF (0%), keep Caps Lock somewhat visible (e.g. 20%) or off?
+        // Let's assume if backlight is 0, we still want Caps Lock visible if active.
+        if (brightness_percent == 0) {
+             brightness_percent = 30; // Standalone brightness if backlight is off
+        } else {
+             brightness_percent += 20; // Boost above ambient backlight
         }
+#else
+        // Fallback if CONFIG_ZMK_BACKLIGHT is not enabled in Kconfig
+        brightness_percent = DEFAULT_CAPS_BRIGHTNESS;
+#endif
         
-        // 4. Clamp to maximum 100%
+        // 4. Clamp to maximum 100% to avoid driver errors
         if (brightness_percent > 100) {
             brightness_percent = 100;
         }
 
-        // 5. Set LED brightness: Use the calculated percentage if active, 0% if inactive
-        int brightness = caps_lock_active ? brightness_percent : 0;
+        // 5. Final calculation: 0 if inactive, calculated percent if active
+        int final_brightness = caps_lock_active ? brightness_percent : 0;
         
-        // The Caps Lock LED is the first child node of caps_leds, so index is 0
-        int ret = led_set_brightness(led_dev, 0, brightness); 
+        // Caps Lock LED is index 0 of the 'caps_leds' parent device
+        int ret = led_set_brightness(led_dev, 0, final_brightness); 
 
         if (ret != 0) {
             LOG_ERR("Failed to set Caps Lock LED brightness (err %d)", ret);
         } else {
-            LOG_DBG("Caps Lock LED state updated: brightness=%d (from level %d)", brightness, current_level);
+            LOG_DBG("Caps Lock LED state updated: brightness=%d", final_brightness);
         }
 
     } else {
