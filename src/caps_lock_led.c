@@ -44,7 +44,7 @@ static int caps_lock_callback(const struct zmk_event_t *eh) {
         
         // 2. Convert level to percentage (0-100)
         // FIX: Corrected typo from zmk_backlight_calc_brighness_val to zmk_backlight_calc_brightness_val
-        brightness_percent = zmk_backlight_get_brightness();
+        brightness_percent = zmk_backlight_get_brt();
         LOG_INF("Stored backlight brightness: %d%%", brightness_percent);
         // 3. Logic: If backlight is ON, make Caps Lock slightly brighter (+20%)
         // If backlight is OFF (0%), keep Caps Lock somewhat visible (e.g. 20%) or off?
