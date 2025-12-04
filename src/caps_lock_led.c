@@ -51,7 +51,7 @@ static int caps_lock_callback(const struct zmk_event_t *eh) {
         if (brightness_percent == 0) {
              brightness_percent = 10; // Standalone brightness if backlight is off
         } else {
-             brightness_percent += 20; // Boost above ambient backlight
+             brightness_percent += 40; // Boost above ambient backlight
         }
 #else
         // Fallback if CONFIG_ZMK_BACKLIGHT is not enabled in Kconfig
